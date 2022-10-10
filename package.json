@@ -1,0 +1,9 @@
+{
+  "name": "async-architechture-course",
+  "version": "1.0.0",
+  "private":"true",
+  "repository": "git@github.com:Hennessy811/async-architechture-course.git",
+  "author": "Dmitriy Malakhov <mitia2022@gmail.com>",
+  "license": "MIT",
+  "workspaces": ["auth","todos"]
+}
