@@ -1,8 +1,10 @@
 import axios from "axios";
 import clsx from "clsx";
+import { getCookie } from "cookies-next";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
+import { producer } from "../server/kafka";
 
 const SignIn = () => {
   const router = useRouter();
@@ -33,7 +35,7 @@ const SignIn = () => {
         url.searchParams.append("token", res.data.token);
         console.log(url.toString());
 
-        // window.location.href = redirectUrl;
+        window.location.href = url.toString();
       } else {
         // router.push("/");
       }
@@ -80,7 +82,9 @@ const SignIn = () => {
         </button>
 
         {error && <p className="text-red-500">{error}</p>}
-        <a href="/sign-up">Don&apos;t have an account?</a>
+        <a href={`/sign-up?redirectUrl=${router.query.redirectUrl ?? "/"}`}>
+          Don&apos;t have an account?
+        </a>
       </form>
     </main>
   );
@@ -89,7 +93,7 @@ const SignIn = () => {
 export default SignIn;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { token } = context.req.cookies;
+  const token = getCookie("token", { req: context.req, res: context.res });
   const redirectUrl = context.query.redirectUrl as string;
 
   let url = "/";
@@ -97,7 +101,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   if (token) {
     if (redirectUrl) {
       const tempUrl = new URL(redirectUrl);
-      tempUrl.searchParams.append("token", token);
+      tempUrl.searchParams.append("token", token.toString());
       url = tempUrl.toString();
     }
 

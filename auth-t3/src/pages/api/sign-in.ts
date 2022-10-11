@@ -2,6 +2,8 @@ import { NextApiHandler } from "next";
 import bcrypt from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { prisma } from "../../server/db/client";
+import { setCookie } from "cookies-next";
+import { producer } from "../../server/kafka";
 
 const handler: NextApiHandler = async (req, res) => {
   const user = await prisma.user.findFirst({
@@ -26,7 +28,7 @@ const handler: NextApiHandler = async (req, res) => {
   });
 
   // set token in cookies
-  res.setHeader("Set-Cookie", `token=${token}; path=/; HttpOnly`);
+  setCookie("token", token, { req, res });
 
   res.status(200).json({ user, token });
 };

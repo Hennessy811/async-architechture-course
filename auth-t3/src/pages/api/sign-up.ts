@@ -2,6 +2,8 @@ import { NextApiHandler } from "next";
 import bcrypt from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { prisma } from "../../server/db/client";
+import { setCookie } from "cookies-next";
+import { producer } from "../../server/kafka";
 // import {prisma}from '../'
 
 const handler: NextApiHandler = async (req, res) => {
@@ -22,7 +24,7 @@ const handler: NextApiHandler = async (req, res) => {
       email: req.body.email,
       passwordHash,
       salt: userSalt,
-      name: req.body.name,
+      name: req.body.username,
     },
   });
 
@@ -40,7 +42,27 @@ const handler: NextApiHandler = async (req, res) => {
   });
 
   // set token in cookies
-  res.setHeader("Set-Cookie", `token=${token}; path=/; HttpOnly`);
+  setCookie("token", token, { req, res });
+
+  await producer.connect();
+  await producer.send({
+    topic: "auth-topic",
+    messages: [
+      {
+        key: "user-created",
+        value: JSON.stringify({
+          type: "user-created",
+          payload: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          },
+        }),
+      },
+    ],
+  });
+  await producer.disconnect();
 
   res.status(200).json({ user, token });
 };

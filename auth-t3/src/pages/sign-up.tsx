@@ -3,13 +3,17 @@ import clsx from "clsx";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 
+const getRandomEmail = () => {
+  return `test${Math.floor(Math.random() * 1000000)}@test.com`;
+};
+
 const SignIn = () => {
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setrepeatPassword] = useState("");
+  const [username, setUsername] = useState("testme");
+  const [email, setEmail] = useState(getRandomEmail());
+  const [password, setPassword] = useState("123");
+  const [repeatPassword, setrepeatPassword] = useState("123");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -38,8 +42,7 @@ const SignIn = () => {
         const url = new URL(redirectUrl);
         url.searchParams.append("token", res.data.token);
         console.log(url.toString());
-
-        // window.location.href = redirectUrl;
+        window.location.href = redirectUrl;
       } else {
         // router.push("/");
       }
